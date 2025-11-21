@@ -1,0 +1,24 @@
+{
+  "name": "celo-prediction-market",
+  "version": "1.0.0",
+  "description": "Prediction market dApp for electrical faults at University of Ibadan on Celo",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy:alfajores": "hardhat run scripts/deploy.js --network alfajores",
+    "verify:alfajores": "hardhat run scripts/verify-deployment.js --network alfajores",
+    "test": "hardhat test",
+    "export-abi": "node scripts/export-abi.js"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "hardhat": "^2.19.0",
+    "chai": "^4.3.10"
+  },
+  "dependencies": {
+    "@celo/contractkit": "^4.0.0",
+    "dotenv": "^16.3.1",
+    "ethers": "^5.7.2"
+  }
+}
+
