@@ -6,6 +6,7 @@ import MarketList from '@/components/MarketList'
 import CreateMarket from '@/components/CreateMarket'
 import WalletConnect from '@/components/WalletConnect'
 import { formatDistance } from 'date-fns'
+import { isMiniPayAvailable } from '@/utils/walletDetection'
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || ''
 const CONTRACT_ABI = [
@@ -76,11 +77,26 @@ export default function Home() {
         setProvider(provider)
         const contractInstance = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
         setContract(contractInstance)
+        
+        // Log wallet type for debugging
+        if (isMiniPayAvailable()) {
+          console.log('Connected via MiniPay')
+        }
       } else {
-        alert('Please install MetaMask or Celo Wallet!')
+        const isMiniPay = isMiniPayAvailable()
+        if (isMiniPay) {
+          alert('MiniPay detected but connection failed. Please make sure MiniPay is unlocked.')
+        } else {
+          alert('Please install MiniPay, MetaMask, or a Celo-compatible wallet!')
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error connecting wallet:', error)
+      if (error.code === 4001) {
+        alert('Connection rejected. Please approve the connection request.')
+      } else {
+        alert(`Error: ${error.message || 'Failed to connect wallet'}`)
+      }
     }
   }
 

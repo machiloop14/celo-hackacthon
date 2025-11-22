@@ -103,6 +103,20 @@ The app will be available at `http://localhost:3000`
 
 ### Step 7: Connect Your Wallet
 
+**Supported Wallets:**
+
+- **MiniPay** (Recommended for mobile) - Built into Opera browser or standalone app
+- **MetaMask** - Browser extension
+- **Celo Wallet** - Celo-specific wallet extension
+
+**For MiniPay (Mobile):**
+
+1. Install [MiniPay](https://www.opera.com/crypto/minipay) on your mobile device
+2. Open the dApp in MiniPay's browser
+3. Click "Connect MiniPay" - it will automatically connect to Celo Sepolia
+
+**For MetaMask/Celo Wallet (Desktop):**
+
 1. Install [MetaMask](https://metamask.io/) or [Celo Wallet](https://celo.org/developers/wallet)
 2. Add Celo Sepolia testnet to your wallet:
    - Network Name: Celo Sepolia
@@ -112,6 +126,8 @@ The app will be available at `http://localhost:3000`
    - Block Explorer: https://celo-sepolia.blockscout.com
 3. Get testnet CELO from the [faucet](https://faucet.celo.org/)
 4. Click "Connect Wallet" in the app
+
+**Note:** The app automatically detects which wallet you're using and provides an optimized experience. See [MINIPAY_INTEGRATION.md](./MINIPAY_INTEGRATION.md) for more details on MiniPay integration.
 
 ## 🎯 How to Use
 
@@ -201,12 +217,51 @@ npm test
 - Verify the market hasn't ended or been resolved
 - Check browser console for detailed error messages
 
+## 🚀 Deployment
+
+### Quick Deploy
+
+**Smart Contract (already deployed)**:
+
+```bash
+npm run deploy:sepolia
+```
+
+**Frontend to Vercel** (Recommended):
+
+```bash
+cd frontend
+npm run build
+vercel --prod
+```
+
+**Or deploy to Netlify**:
+
+```bash
+cd frontend
+npm run build
+netlify deploy --prod
+```
+
+### Environment Variables for Production
+
+Set these in your hosting platform (Vercel/Netlify):
+
+```
+NEXT_PUBLIC_CONTRACT_ADDRESS=0xYourContractAddress
+NEXT_PUBLIC_NETWORK=sepolia
+NEXT_PUBLIC_RPC_URL=https://forno.celo-sepolia.celo-testnet.org
+```
+
+**📖 For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md)**
+
 ## 📚 Additional Resources
 
 - [Celo Documentation](https://docs.celo.org/)
 - [Hardhat Documentation](https://hardhat.org/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Ethers.js Documentation](https://docs.ethers.io/)
+- [Vercel Deployment](https://vercel.com/docs)
 
 ## 📄 License
 

@@ -1,6 +1,8 @@
 interface Window {
   ethereum?: {
     isMetaMask?: boolean;
+    isMiniPay?: boolean;
+    isOpera?: boolean;
     request: (args: { method: string; params?: any[] }) => Promise<any>;
     send: (method: string, params?: any[]) => Promise<any>;
     on: (event: string, callback: (...args: any[]) => void) => void;
@@ -8,6 +10,7 @@ interface Window {
     removeAllListeners: (event: string) => void;
     listAccounts: () => Promise<string[]>;
   };
+  celo?: any;
 }
 
 
