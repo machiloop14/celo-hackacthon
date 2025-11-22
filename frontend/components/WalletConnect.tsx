@@ -6,9 +6,10 @@ import { detectWallets, isMiniPayAvailable } from '@/utils/walletDetection'
 interface WalletConnectProps {
   account: string | null
   connectWallet: () => void
+  disconnectWallet: () => void
 }
 
-export default function WalletConnect({ account, connectWallet }: WalletConnectProps) {
+export default function WalletConnect({ account, connectWallet, disconnectWallet }: WalletConnectProps) {
   const [wallets, setWallets] = useState<ReturnType<typeof detectWallets>>([])
   const [isMiniPay, setIsMiniPay] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -27,16 +28,25 @@ export default function WalletConnect({ account, connectWallet }: WalletConnectP
   if (account) {
     return (
       <div className="mb-6 flex justify-end items-center gap-3">
-        {isMiniPay && (
+        {mounted && isMiniPay && (
           <div className="bg-celo-gold/20 text-gray-700 px-3 py-1 rounded-full text-xs font-medium">
             🟢 MiniPay
           </div>
         )}
-        <div className="bg-white rounded-lg shadow-md px-6 py-3">
-          <span className="text-sm text-gray-600">Connected: </span>
-          <span className="text-sm font-mono text-celo-green">
-            {account.slice(0, 6)}...{account.slice(-4)}
-          </span>
+        <div className="bg-white rounded-lg shadow-md px-6 py-3 flex items-center gap-3">
+          <div>
+            <span className="text-sm text-gray-600">Connected: </span>
+            <span className="text-sm font-mono text-celo-green">
+              {account.slice(0, 6)}...{account.slice(-4)}
+            </span>
+          </div>
+          <button
+            onClick={disconnectWallet}
+            className="text-xs text-red-600 hover:text-red-700 font-medium px-3 py-1 border border-red-300 rounded hover:bg-red-50 transition-colors"
+            title="Disconnect wallet"
+          >
+            Disconnect
+          </button>
         </div>
       </div>
     )
