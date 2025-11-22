@@ -7,7 +7,7 @@ This guide will walk you through setting up and deploying the prediction market 
 - [ ] Node.js v16+ installed
 - [ ] npm or yarn installed
 - [ ] MetaMask or Celo Wallet browser extension
-- [ ] A wallet with Celo Alfajores testnet CELO (get from faucet)
+- [ ] A wallet with Celo Sepolia testnet CELO (get from faucet)
 
 ## Step 1: Initial Setup
 
@@ -18,7 +18,8 @@ This guide will walk you through setting up and deploying the prediction market 
 cd C:\Users\USER\coding\celo
 
 # Install dependencies
-npm install
+# Note: Use --legacy-peer-deps to resolve dependency conflicts
+npm install --legacy-peer-deps
 ```
 
 This installs:
@@ -48,7 +49,7 @@ Create a `.env` file in the root directory:
 
 ```bash
 PRIVATE_KEY=your_wallet_private_key_here
-CELO_ALFAJORES_RPC_URL=https://alfajores-forno.celo-testnet.org
+CELO_SEPOLIA_RPC_URL=https://forno.celo-sepolia.celo-testnet.org
 ```
 
 **⚠️ Security Warning:**
@@ -58,7 +59,7 @@ CELO_ALFAJORES_RPC_URL=https://alfajores-forno.celo-testnet.org
 
 ### 2.2 Get Testnet CELO
 
-1. Go to [Celo Alfajores Faucet](https://faucet.celo.org/alfajores)
+1. Go to [Celo Sepolia Faucet](https://faucet.celo.org/)
 2. Connect your wallet
 3. Request testnet CELO tokens
 4. Wait for the transaction to confirm
@@ -80,20 +81,20 @@ This will:
 Compiled 1 Solidity file successfully
 ```
 
-## Step 4: Deploy to Celo Alfajores
+## Step 4: Deploy to Celo Sepolia
 
 ### 4.1 Deploy the Contract
 
 ```bash
-npm run deploy:alfajores
+npm run deploy:sepolia
 ```
 
 **Expected Output:**
 ```
 Deploying PredictionMarket contract...
 PredictionMarket deployed to: 0x...
-Network: alfajores
-Deployment info saved to deployments/alfajores.json
+Network: sepolia
+Deployment info saved to deployments/sepolia.json
 ```
 
 ### 4.2 Save Contract Address
@@ -108,8 +109,8 @@ Create `frontend/.env.local`:
 
 ```bash
 NEXT_PUBLIC_CONTRACT_ADDRESS=0xYourDeployedContractAddress
-NEXT_PUBLIC_NETWORK=alfajores
-NEXT_PUBLIC_RPC_URL=https://alfajores-forno.celo-testnet.org
+NEXT_PUBLIC_NETWORK=sepolia
+NEXT_PUBLIC_RPC_URL=https://forno.celo-sepolia.celo-testnet.org
 ```
 
 Replace `0xYourDeployedContractAddress` with the actual address from Step 4.
@@ -127,25 +128,25 @@ This creates `frontend/contracts/PredictionMarket.json` with the full ABI.
 
 ## Step 6: Configure MetaMask/Celo Wallet
 
-### 6.1 Add Celo Alfajores Network
+### 6.1 Add Celo Sepolia Network
 
 **For MetaMask:**
 1. Open MetaMask
 2. Click network dropdown → "Add Network" → "Add a network manually"
 3. Enter:
-   - Network Name: `Celo Alfajores`
-   - RPC URL: `https://alfajores-forno.celo-testnet.org`
-   - Chain ID: `44787`
+   - Network Name: `Celo Sepolia`
+   - RPC URL: `https://forno.celo-sepolia.celo-testnet.org`
+   - Chain ID: `11142220`
    - Currency Symbol: `CELO`
-   - Block Explorer: `https://alfajores.celoscan.io`
+   - Block Explorer: `https://celo-sepolia.blockscout.com`
 4. Save
 
 **For Celo Wallet:**
-- Celo Alfajores is usually pre-configured
+- Celo Sepolia may need to be added manually
 
-### 6.2 Switch to Alfajores Network
+### 6.2 Switch to Sepolia Network
 
-Make sure your wallet is connected to Celo Alfajores testnet.
+Make sure your wallet is connected to Celo Sepolia testnet.
 
 ## Step 7: Run the Frontend
 
@@ -216,12 +217,12 @@ npm install
 ### "Insufficient funds" error
 - Check you have CELO in your wallet
 - Get more from the faucet
-- Make sure you're on Alfajores testnet
+- Make sure you're on Sepolia testnet
 
 ### "Contract not deployed" error
 - Verify contract address in `frontend/.env.local`
-- Make sure you deployed to Alfajores
-- Check the address on [CeloScan](https://alfajores.celoscan.io)
+- Make sure you deployed to Sepolia
+- Check the address on [BlockScout](https://celo-sepolia.blockscout.com)
 
 ### Frontend won't connect to wallet
 - Make sure MetaMask/Celo Wallet is installed
@@ -261,8 +262,8 @@ npm test
 # Compile contracts
 npm run compile
 
-# Deploy to Alfajores
-npm run deploy:alfajores
+# Deploy to Sepolia
+npm run deploy:sepolia
 
 # Run tests
 npm test

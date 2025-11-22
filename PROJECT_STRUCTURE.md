@@ -36,7 +36,7 @@ celo/
 │   └── tsconfig.json            # TypeScript config
 │
 ├── deployments/                  # Deployment artifacts (auto-generated)
-│   └── alfajores.json           # Deployment info for Alfajores
+│   └── sepolia.json             # Deployment info for Sepolia
 │
 ├── artifacts/                    # Compiled contracts (auto-generated)
 │   └── contracts/
@@ -97,7 +97,7 @@ celo/
 
 **`hardhat.config.js`**
 - Hardhat configuration
-- Network settings for Celo Alfajores
+- Network settings for Celo Sepolia
 - Solidity compiler settings
 
 **`frontend/next.config.js`**
@@ -195,7 +195,7 @@ Next.js App (App Router)
 - **date-fns** - Date formatting
 
 ### Network
-- **Celo Alfajores** - Testnet
+- **Celo Sepolia** - Testnet
 - **CELO** - Native token
 
 ## Development Workflow
@@ -203,7 +203,7 @@ Next.js App (App Router)
 1. **Write/Modify Contract** → `contracts/PredictionMarket.sol`
 2. **Compile** → `npm run compile`
 3. **Test** → `npm test`
-4. **Deploy** → `npm run deploy:alfajores`
+4. **Deploy** → `npm run deploy:sepolia`
 5. **Update Frontend** → Update `frontend/.env.local` with new address
 6. **Run Frontend** → `cd frontend && npm run dev`
 7. **Test in Browser** → http://localhost:3000
@@ -211,7 +211,7 @@ Next.js App (App Router)
 ## Important Notes
 
 - Contract address must be updated in `frontend/.env.local` after each deployment
-- Always test on Alfajores before mainnet
+- Always test on Sepolia before mainnet
 - Keep private keys secure and never commit them
 - Market creators are responsible for resolving markets fairly
 - Fees are collected in the contract and can be withdrawn by owner

@@ -4,8 +4,8 @@
   "description": "Prediction market dApp for electrical faults at University of Ibadan on Celo",
   "scripts": {
     "compile": "hardhat compile",
-    "deploy:alfajores": "hardhat run scripts/deploy.js --network alfajores",
-    "verify:alfajores": "hardhat run scripts/verify-deployment.js --network alfajores",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "verify:sepolia": "hardhat run scripts/verify-deployment.js --network sepolia",
     "test": "hardhat test",
     "export-abi": "node scripts/export-abi.js"
   },
@@ -21,4 +21,3 @@
     "ethers": "^5.7.2"
   }
 }
-

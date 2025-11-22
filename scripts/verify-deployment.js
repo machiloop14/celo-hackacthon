@@ -8,7 +8,7 @@ async function main() {
 
   if (!fs.existsSync(deploymentFile)) {
     console.error(`No deployment found for network: ${network}`);
-    console.log("Please deploy the contract first: npm run deploy:alfajores");
+    console.log("Please deploy the contract first: npm run deploy:sepolia");
     process.exit(1);
   }
 

@@ -1,6 +1,6 @@
 # UI Electrical Fault Prediction Market on Celo
 
-A decentralized prediction market dApp built on Celo Alfajores testnet for predicting daily electrical faults at the University of Ibadan.
+A decentralized prediction market dApp built on Celo Sepolia testnet for predicting daily electrical faults at the University of Ibadan.
 
 ## 🏗️ Project Structure
 
@@ -25,7 +25,7 @@ celo/
 - Node.js (v16 or higher)
 - npm or yarn
 - MetaMask or Celo Wallet extension
-- Celo Alfajores testnet CELO tokens (get from [faucet](https://faucet.celo.org/alfajores))
+- Celo Sepolia testnet CELO tokens (get from [faucet](https://faucet.celo.org/))
 
 ## 🚀 Step-by-Step Setup
 
@@ -33,7 +33,8 @@ celo/
 
 ```bash
 # Install root dependencies (Hardhat, etc.)
-npm install
+# Note: Use --legacy-peer-deps to resolve dependency conflicts
+npm install --legacy-peer-deps
 
 # Install frontend dependencies
 cd frontend
@@ -47,7 +48,7 @@ Create a `.env` file in the root directory:
 
 ```bash
 PRIVATE_KEY=your_private_key_here
-CELO_ALFAJORES_RPC_URL=https://alfajores-forno.celo-testnet.org
+CELO_SEPOLIA_RPC_URL=https://forno.celo-sepolia.celo-testnet.org
 ```
 
 **⚠️ Important:** Never commit your private key to version control!
@@ -60,21 +61,21 @@ npm run compile
 
 This will compile the Solidity contracts and generate artifacts in the `artifacts/` directory.
 
-### Step 4: Deploy to Celo Alfajores Testnet
+### Step 4: Deploy to Celo Sepolia Testnet
 
 Make sure you have:
 
-1. A wallet with CELO tokens on Alfajores testnet
+1. A wallet with CELO tokens on Sepolia testnet
 2. Your private key in the `.env` file
 
 ```bash
-npm run deploy:alfajores
+npm run deploy:sepolia
 ```
 
 After deployment, you'll see:
 
 - Contract address
-- Deployment info saved to `deployments/alfajores.json`
+- Deployment info saved to `deployments/sepolia.json`
 
 ### Step 5: Configure Frontend
 
@@ -83,11 +84,13 @@ After deployment, you'll see:
 
 ```bash
 NEXT_PUBLIC_CONTRACT_ADDRESS=your_deployed_contract_address
-NEXT_PUBLIC_NETWORK=alfajores
-NEXT_PUBLIC_RPC_URL=https://alfajores-forno.celo-testnet.org
+NEXT_PUBLIC_NETWORK=sepolia
+NEXT_PUBLIC_RPC_URL=https://forno.celo-sepolia.celo-testnet.org
 ```
 
-3. Update the contract ABI in `frontend/app/page.tsx` if needed (or copy from `artifacts/contracts/PredictionMarket.sol/PredictionMarket.json`)
+3. **Note about ABI**: The contract ABI (Application Binary Interface) is already included in `frontend/app/page.tsx` (lines 11-23). You don't need to change anything unless you modify the smart contract. If you do modify the contract:
+   - Option 1: Manually update the `CONTRACT_ABI` array in `frontend/app/page.tsx` with the new function signatures
+   - Option 2: Import the full ABI from the compiled artifact file: `import PredictionMarketABI from '../../artifacts/contracts/PredictionMarket.sol/PredictionMarket.json'` and use `PredictionMarketABI.abi` instead of the hardcoded array
 
 ### Step 6: Run the Frontend
 
@@ -101,13 +104,13 @@ The app will be available at `http://localhost:3000`
 ### Step 7: Connect Your Wallet
 
 1. Install [MetaMask](https://metamask.io/) or [Celo Wallet](https://celo.org/developers/wallet)
-2. Add Celo Alfajores testnet to your wallet:
-   - Network Name: Celo Alfajores
-   - RPC URL: https://alfajores-forno.celo-testnet.org
-   - Chain ID: 44787
+2. Add Celo Sepolia testnet to your wallet:
+   - Network Name: Celo Sepolia
+   - RPC URL: https://forno.celo-sepolia.celo-testnet.org
+   - Chain ID: 11142220
    - Currency Symbol: CELO
-   - Block Explorer: https://alfajores.celoscan.io
-3. Get testnet CELO from the [faucet](https://faucet.celo.org/alfajores)
+   - Block Explorer: https://celo-sepolia.blockscout.com
+3. Get testnet CELO from the [faucet](https://faucet.celo.org/)
 4. Click "Connect Wallet" in the app
 
 ## 🎯 How to Use
@@ -173,12 +176,12 @@ npm test
 
 ## 🌐 Network Information
 
-### Celo Alfajores Testnet
+### Celo Sepolia Testnet
 
-- Chain ID: 44787
-- RPC URL: https://alfajores-forno.celo-testnet.org
-- Block Explorer: https://alfajores.celoscan.io
-- Faucet: https://faucet.celo.org/alfajores
+- Chain ID: 11142220
+- RPC URL: https://forno.celo-sepolia.celo-testnet.org
+- Block Explorer: https://celo-sepolia.blockscout.com
+- Faucet: https://faucet.celo.org/
 
 ## 🛠️ Troubleshooting
 
@@ -190,7 +193,7 @@ npm test
 ### "Contract not deployed" error
 
 - Verify the contract address in `frontend/.env.local`
-- Make sure you deployed to Alfajores testnet
+- Make sure you deployed to Sepolia testnet
 
 ### "Transaction failed" error
 

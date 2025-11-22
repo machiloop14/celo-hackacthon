@@ -15,10 +15,10 @@ module.exports = {
     },
   },
   networks: {
-    alfajores: {
-      url: "https://alfajores-forno.celo-testnet.org",
+    sepolia: {
+      url: "https://forno.celo-sepolia.celo-testnet.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 44787,
+      chainId: 11142220,
     },
   },
   paths: {

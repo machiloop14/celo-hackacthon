@@ -5,7 +5,7 @@ Get up and running in 5 minutes!
 ## 1. Install Dependencies
 
 ```bash
-npm install
+npm install --legacy-peer-deps
 cd frontend && npm install && cd ..
 ```
 
@@ -20,7 +20,7 @@ PRIVATE_KEY=your_private_key
 
 ```bash
 npm run compile
-npm run deploy:alfajores
+npm run deploy:sepolia
 ```
 
 Copy the contract address from output.
@@ -30,8 +30,8 @@ Copy the contract address from output.
 Create `frontend/.env.local`:
 ```
 NEXT_PUBLIC_CONTRACT_ADDRESS=0xYourContractAddress
-NEXT_PUBLIC_NETWORK=alfajores
-NEXT_PUBLIC_RPC_URL=https://alfajores-forno.celo-testnet.org
+NEXT_PUBLIC_NETWORK=sepolia
+NEXT_PUBLIC_RPC_URL=https://forno.celo-sepolia.celo-testnet.org
 ```
 
 ## 5. Run Frontend
@@ -46,8 +46,8 @@ Open http://localhost:3000
 ## 6. Connect Wallet
 
 1. Install MetaMask/Celo Wallet
-2. Add Celo Alfajores network (Chain ID: 44787)
-3. Get testnet CELO from [faucet](https://faucet.celo.org/alfajores)
+2. Add Celo Sepolia network (Chain ID: 11142220)
+3. Get testnet CELO from [faucet](https://faucet.celo.org/)
 4. Click "Connect Wallet" in the app
 
 ## Done! 🎉
