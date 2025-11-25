@@ -5,8 +5,8 @@ import { ethers } from "ethers";
 import MarketList from "@/components/MarketList";
 import CreateMarket from "@/components/CreateMarket";
 import WalletConnect from "@/components/WalletConnect";
-import { formatDistance } from "date-fns";
 import { isMiniPayAvailable } from "@/utils/walletDetection";
+import Link from "next/link";
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
 const CONTRACT_ABI = [
@@ -109,13 +109,19 @@ export default function Home() {
   useEffect(() => {
     if (contract && account) {
       loadMarkets();
-      // Listen for events
-      contract.on("MarketCreated", loadMarkets);
-      contract.on("BetPlaced", loadMarkets);
-      contract.on("MarketResolved", loadMarkets);
+
+      const handleMarketUpdate = () => {
+        loadMarkets();
+      };
+
+      contract.on("MarketCreated", handleMarketUpdate);
+      contract.on("MarketResolved", handleMarketUpdate);
+      contract.on("BetPlaced", handleMarketUpdate);
 
       return () => {
-        contract.removeAllListeners();
+        contract.removeListener("MarketCreated", handleMarketUpdate);
+        contract.removeListener("MarketResolved", handleMarketUpdate);
+        contract.removeListener("BetPlaced", handleMarketUpdate);
       };
     }
   }, [contract, account]);
@@ -279,6 +285,14 @@ export default function Home() {
           <p className="text-gray-600">
             Predict daily electrical faults at University of Ibadan on Celo
           </p>
+          <div className="mt-4">
+            <Link
+              href="/leaderboard"
+              className="inline-flex items-center rounded-full border border-celo-green px-5 py-2 text-sm font-semibold text-celo-green hover:bg-celo-green/10"
+            >
+              View Leaderboard
+            </Link>
+          </div>
         </div>
 
         <WalletConnect
