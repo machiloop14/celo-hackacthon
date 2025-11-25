@@ -9,6 +9,7 @@ import { isMiniPayAvailable } from "@/utils/walletDetection";
 import Link from "next/link";
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
+
 const CONTRACT_ABI = [
   "function createMarket(string memory _question, uint256 _durationInDays) external returns (uint256)",
   "function placeBet(uint256 _marketId, bool _side) external payable",
@@ -285,12 +286,18 @@ export default function Home() {
           <p className="text-gray-600">
             Predict daily electrical faults at University of Ibadan on Celo
           </p>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/leaderboard"
               className="inline-flex items-center rounded-full border border-celo-green px-5 py-2 text-sm font-semibold text-celo-green hover:bg-celo-green/10"
             >
               View Leaderboard
+            </Link>
+            <Link
+              href="/analytics"
+              className="inline-flex items-center rounded-full bg-celo-gold px-5 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-celo-gold/90"
+            >
+              View Daily Activity
             </Link>
           </div>
         </div>
