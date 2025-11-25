@@ -6,6 +6,9 @@ import { ethers } from "ethers";
 import PredictionChart, {
   DailyPredictionPoint,
 } from "@/components/PredictionChart";
+import ResolutionHistoryChart, {
+  ResolutionPoint,
+} from "@/components/ResolutionHistoryChart";
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
@@ -17,6 +20,8 @@ const ACTIVITY_START_BLOCK =
 
 const CONTRACT_ABI = [
   "event BetPlaced(uint256 indexed marketId, address indexed bettor, bool side, uint256 amount)",
+  "event MarketResolved(uint256 indexed marketId, bool outcome)",
+  "function getMarket(uint256 _marketId) external view returns (uint256 id, string memory question, uint256 endTime, bool resolved, uint256 yesVotes, uint256 noVotes, uint256 totalStaked, address creator)",
 ];
 
 const createProvider = () => {
@@ -39,8 +44,13 @@ export default function AnalyticsPage() {
   const [dailyPredictions, setDailyPredictions] = useState<
     DailyPredictionPoint[]
   >([]);
+  const [resolutionHistory, setResolutionHistory] = useState<ResolutionPoint[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resolutionLoading, setResolutionLoading] = useState(false);
+  const [resolutionError, setResolutionError] = useState<string | null>(null);
   const [setupError, setSetupError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -146,28 +156,106 @@ export default function AnalyticsPage() {
     }
   }, [contract, provider]);
 
+  const loadResolutionHistory = useCallback(async () => {
+    if (!contract || !provider) return;
+
+    try {
+      setResolutionLoading(true);
+      setResolutionError(null);
+
+      const filter = contract.filters.MarketResolved();
+      const events = await contract.queryFilter(filter, ACTIVITY_START_BLOCK);
+
+      if (events.length === 0) {
+        setResolutionHistory([]);
+        return;
+      }
+
+      const uniqueBlocks = Array.from(
+        new Set(events.map((event) => event.blockNumber))
+      );
+      const blocks = await Promise.all(
+        uniqueBlocks.map(async (blockNumber) => {
+          const block = await provider.getBlock(blockNumber);
+          return {
+            blockNumber,
+            timestamp: block.timestamp * 1000,
+          };
+        })
+      );
+      const blockTimestampMap = new Map(
+        blocks.map((block) => [block.blockNumber, block.timestamp])
+      );
+
+      const dailyTotals: Record<string, { yes: number; no: number }> = {};
+
+      events.forEach((event) => {
+        const timestamp = blockTimestampMap.get(event.blockNumber);
+        if (!timestamp) return;
+
+        const dateKey = new Date(timestamp).toISOString().split("T")[0];
+        const outcome = event.args?.outcome as boolean | undefined;
+
+        if (!dailyTotals[dateKey]) {
+          dailyTotals[dateKey] = { yes: 0, no: 0 };
+        }
+
+        if (outcome) {
+          dailyTotals[dateKey].yes += 1;
+        } else {
+          dailyTotals[dateKey].no += 1;
+        }
+      });
+
+      const sortedEntries = Object.entries(dailyTotals).sort((a, b) =>
+        a[0] < b[0] ? -1 : 1
+      );
+
+      const recentEntries = sortedEntries.slice(-30);
+      const chartPoints = recentEntries.map(([date, totals]) => ({
+        date,
+        yesWins: totals.yes,
+        noWins: totals.no,
+      }));
+
+      setResolutionHistory(chartPoints);
+    } catch (err) {
+      console.error("Error loading resolution history:", err);
+      setResolutionError("Unable to load resolution history. Please try again.");
+    } finally {
+      setResolutionLoading(false);
+    }
+  }, [contract, provider]);
+
   useEffect(() => {
     if (!contract) return;
 
     loadDailyPredictions();
+    loadResolutionHistory();
 
     const handleBetPlaced = () => {
       loadDailyPredictions();
     };
+    const handleMarketResolved = () => {
+      loadResolutionHistory();
+    };
 
-    try {
-      contract.on("BetPlaced", handleBetPlaced);
-      return () => {
-        contract.removeListener("BetPlaced", handleBetPlaced);
-      };
-    } catch {
-      return;
-    }
-  }, [contract, loadDailyPredictions]);
+    contract.on("BetPlaced", handleBetPlaced);
+    contract.on("MarketResolved", handleMarketResolved);
 
-  const combinedError = useMemo(() => {
+    return () => {
+      contract.removeListener("BetPlaced", handleBetPlaced);
+      contract.removeListener("MarketResolved", handleMarketResolved);
+    };
+  }, [contract, loadDailyPredictions, loadResolutionHistory]);
+
+  const combinedPredictionError = useMemo(() => {
     return setupError || error;
   }, [setupError, error]);
+
+  const combinedResolutionError = useMemo(() => {
+    return setupError || resolutionError;
+  }, [setupError, resolutionError]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-celo-green/10 to-celo-gold/10">
@@ -195,8 +283,15 @@ export default function AnalyticsPage() {
         <PredictionChart
           data={dailyPredictions}
           loading={loading}
-          error={combinedError}
+          error={combinedPredictionError}
           onRefresh={loadDailyPredictions}
+        />
+
+        <ResolutionHistoryChart
+          data={resolutionHistory}
+          loading={resolutionLoading}
+          error={combinedResolutionError}
+          onRefresh={loadResolutionHistory}
         />
       </div>
     </main>
