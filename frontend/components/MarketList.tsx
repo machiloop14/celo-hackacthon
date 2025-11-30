@@ -21,9 +21,11 @@ interface MarketListProps {
   contract: ethers.Contract
   account: string
   onUpdate: () => void
+  cusdToken: ethers.Contract
+  cusdAddress: string
 }
 
-export default function MarketList({ markets, contract, account, onUpdate }: MarketListProps) {
+export default function MarketList({ markets, contract, account, onUpdate, cusdToken, cusdAddress }: MarketListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {markets.map((market) => (
@@ -33,6 +35,8 @@ export default function MarketList({ markets, contract, account, onUpdate }: Mar
           contract={contract}
           account={account}
           onUpdate={onUpdate}
+          cusdToken={cusdToken}
+          cusdAddress={cusdAddress}
         />
       ))}
     </div>

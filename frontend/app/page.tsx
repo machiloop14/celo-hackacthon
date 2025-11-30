@@ -10,9 +10,15 @@ import Link from "next/link";
 
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
 
+// cUSD token addresses
+const CUSD_ADDRESSES: { [key: string]: string } = {
+  sepolia: "0xdE9e4C3ce781b4bA68120d6261cbad65ce0aB00b", // Celo Sepolia testnet
+  mainnet: "0x765DE816845861e75A25fCA122bb6898B8B1282a", // Celo mainnet
+};
+
 const CONTRACT_ABI = [
   "function createMarket(string memory _question, uint256 _durationInDays) external returns (uint256)",
-  "function placeBet(uint256 _marketId, bool _side) external payable",
+  "function placeBet(uint256 _marketId, bool _side, uint256 _amount) external",
   "function resolveMarket(uint256 _marketId, bool _outcome) external",
   "function claimWinnings(uint256 _marketId) external",
   "function getMarket(uint256 _marketId) external view returns (uint256 id, string memory question, uint256 endTime, bool resolved, uint256 yesVotes, uint256 noVotes, uint256 totalStaked, address creator)",
@@ -24,6 +30,14 @@ const CONTRACT_ABI = [
   "event WinningsClaimed(uint256 indexed marketId, address indexed winner, uint256 amount)",
 ];
 
+// ERC20 ABI for cUSD token
+const ERC20_ABI = [
+  "function approve(address spender, uint256 amount) external returns (bool)",
+  "function allowance(address owner, address spender) external view returns (uint256)",
+  "function balanceOf(address account) external view returns (uint256)",
+  "function decimals() external view returns (uint8)",
+];
+
 export default function Home() {
   const [account, setAccount] = useState<string | null>(null);
   const [provider, setProvider] =
@@ -31,6 +45,8 @@ export default function Home() {
   const [contract, setContract] = useState<ethers.Contract | null>(null);
   const [markets, setMarkets] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [cusdToken, setCusdToken] = useState<ethers.Contract | null>(null);
+  const [cusdAddress, setCusdAddress] = useState<string>("");
 
   const disconnectWallet = () => {
     // Remove all event listeners from contract
@@ -57,7 +73,7 @@ export default function Home() {
       checkConnection();
 
       // Listen for account changes
-      const handleAccountsChanged = (accounts: string[]) => {
+      const handleAccountsChanged = async (accounts: string[]) => {
         if (accounts.length === 0) {
           // User disconnected from wallet
           disconnectWallet();
@@ -82,6 +98,21 @@ export default function Home() {
             signer
           );
           setContract(contractInstance);
+
+          // Get network and set cUSD token address
+          const network = await newProvider.getNetwork();
+          const chainId = network.chainId.toString();
+          const networkName = chainId === "11142220" ? "sepolia" : chainId === "42220" ? "mainnet" : "sepolia";
+          const cusdAddr = CUSD_ADDRESSES[networkName] || CUSD_ADDRESSES.sepolia;
+          setCusdAddress(cusdAddr);
+          
+          // Create cUSD token contract instance
+          const tokenContract = new ethers.Contract(
+            cusdAddr,
+            ERC20_ABI,
+            signer
+          );
+          setCusdToken(tokenContract);
         }
       };
 
@@ -152,6 +183,21 @@ export default function Home() {
           signer
         );
         setContract(contractInstance);
+
+        // Get network and set cUSD token address
+        const network = await provider.getNetwork();
+        const chainId = network.chainId.toString();
+        const networkName = chainId === "11142220" ? "sepolia" : chainId === "42220" ? "mainnet" : "sepolia";
+        const cusdAddr = CUSD_ADDRESSES[networkName] || CUSD_ADDRESSES.sepolia;
+        setCusdAddress(cusdAddr);
+        
+        // Create cUSD token contract instance
+        const tokenContract = new ethers.Contract(
+          cusdAddr,
+          ERC20_ABI,
+          signer
+        );
+        setCusdToken(tokenContract);
       }
     } catch (error) {
       console.error("Error checking connection:", error);
@@ -308,7 +354,7 @@ export default function Home() {
           disconnectWallet={disconnectWallet}
         />
 
-        {account && contract && (
+        {account && contract && cusdToken && (
           <>
             <CreateMarket contract={contract} onMarketCreated={loadMarkets} />
 
@@ -326,6 +372,8 @@ export default function Home() {
                   contract={contract}
                   account={account}
                   onUpdate={loadMarkets}
+                  cusdToken={cusdToken}
+                  cusdAddress={cusdAddress}
                 />
               )}
             </div>

@@ -1,6 +1,7 @@
 {
   "network": "sepolia",
-  "contractAddress": "0x1328EDe502E331B0a36FbaE4bfBd37beF5886850",
+  "contractAddress": "0x5d401f3F9b428a8B3465F2CE07134d775b1808b9",
+  "cusdTokenAddress": "0xdE9e4C3ce781b4bA68120d6261cbad65ce0aB00b",
   "deployer": "0xf80Ea8aB004a0c516f9F441Dfd188BA50d09A488",
-  "timestamp": "2025-11-22T08:46:57.275Z"
+  "timestamp": "2025-11-30T14:10:49.217Z"
 }

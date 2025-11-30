@@ -78,7 +78,7 @@ export default function Leaderboard({
 
                 <div className="text-right">
                   <p className="text-base font-semibold text-gray-900">
-                    {parseFloat(entry.totalWon).toFixed(3)} CELO
+                    {parseFloat(entry.totalWon).toFixed(3)} cUSD
                   </p>
                   <p className="text-xs text-gray-500">Total won</p>
                 </div>

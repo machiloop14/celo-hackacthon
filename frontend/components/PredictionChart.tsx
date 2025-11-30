@@ -80,7 +80,7 @@ export default function PredictionChart({
             color: "rgba(148, 163, 184, 0.3)",
           },
           ticks: {
-            callback: (value: number | string) => `${value} CELO`,
+            callback: (value: number | string) => `${value} cUSD`,
           },
         },
       },
@@ -96,7 +96,7 @@ export default function PredictionChart({
             label: (context: any) => {
               const label = context.dataset.label || "";
               const value = context.parsed.y ?? context.parsed;
-              return `${label}: ${value.toFixed(3)} CELO`;
+              return `${label}: ${value.toFixed(3)} cUSD`;
             },
           },
         },

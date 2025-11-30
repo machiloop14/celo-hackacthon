@@ -166,7 +166,7 @@ export default function LeaderboardPage() {
               Top Winnings on UI Fault Market
             </h1>
             <p className="text-sm text-gray-600">
-              Ranked by total CELO claimed from resolved markets.
+              Ranked by total cUSD claimed from resolved markets.
             </p>
           </div>
           <Link

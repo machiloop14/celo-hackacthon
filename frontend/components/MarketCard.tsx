@@ -20,9 +20,11 @@ interface MarketCardProps {
   contract: ethers.Contract
   account: string
   onUpdate: () => void
+  cusdToken: ethers.Contract
+  cusdAddress: string
 }
 
-export default function MarketCard({ market, contract, account, onUpdate }: MarketCardProps) {
+export default function MarketCard({ market, contract, account, onUpdate, cusdToken, cusdAddress }: MarketCardProps) {
   const [betAmount, setBetAmount] = useState('')
   const [userYesBet, setUserYesBet] = useState('0')
   const [userNoBet, setUserNoBet] = useState('0')
@@ -57,9 +59,20 @@ export default function MarketCard({ market, contract, account, onUpdate }: Mark
 
     try {
       setLoading(true)
-      const tx = await contract.placeBet(market.id, side, {
-        value: ethers.utils.parseEther(betAmount),
-      })
+      const amount = ethers.utils.parseEther(betAmount)
+      
+      // Check and approve token allowance
+      const contractAddress = contract.address
+      const allowance = await cusdToken.allowance(account, contractAddress)
+      
+      if (allowance.lt(amount)) {
+        // Need to approve
+        const approveTx = await cusdToken.approve(contractAddress, ethers.constants.MaxUint256)
+        await approveTx.wait()
+      }
+
+      // Place the bet
+      const tx = await contract.placeBet(market.id, side, amount)
       await tx.wait()
       setBetAmount('')
       loadUserBets()
@@ -129,7 +142,7 @@ export default function MarketCard({ market, contract, account, onUpdate }: Mark
       <div className="mb-4">
         <div className="flex justify-between mb-2">
           <span className="text-sm font-medium">YES</span>
-          <span className="text-sm">{parseFloat(market.yesVotes).toFixed(4)} CELO</span>
+          <span className="text-sm">{parseFloat(market.yesVotes).toFixed(4)} cUSD</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
           <div
@@ -139,7 +152,7 @@ export default function MarketCard({ market, contract, account, onUpdate }: Mark
         </div>
         <div className="flex justify-between mb-2">
           <span className="text-sm font-medium">NO</span>
-          <span className="text-sm">{parseFloat(market.noVotes).toFixed(4)} CELO</span>
+          <span className="text-sm">{parseFloat(market.noVotes).toFixed(4)} cUSD</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
@@ -150,13 +163,13 @@ export default function MarketCard({ market, contract, account, onUpdate }: Mark
       </div>
 
       <div className="text-sm text-gray-600 mb-4">
-        Total Staked: <span className="font-semibold">{parseFloat(market.totalStaked).toFixed(4)} CELO</span>
+        Total Staked: <span className="font-semibold">{parseFloat(market.totalStaked).toFixed(4)} cUSD</span>
       </div>
 
       {(parseFloat(userYesBet) > 0 || parseFloat(userNoBet) > 0) && (
         <div className="mb-4 p-2 bg-gray-50 rounded text-sm">
-          <div>Your YES bet: {parseFloat(userYesBet).toFixed(4)} CELO</div>
-          <div>Your NO bet: {parseFloat(userNoBet).toFixed(4)} CELO</div>
+          <div>Your YES bet: {parseFloat(userYesBet).toFixed(4)} cUSD</div>
+          <div>Your NO bet: {parseFloat(userNoBet).toFixed(4)} cUSD</div>
         </div>
       )}
 
@@ -166,7 +179,7 @@ export default function MarketCard({ market, contract, account, onUpdate }: Mark
             type="number"
             value={betAmount}
             onChange={(e) => setBetAmount(e.target.value)}
-            placeholder="Amount (CELO)"
+            placeholder="Amount (cUSD)"
             step="0.001"
             min="0"
             className="w-full px-3 py-2 border border-gray-300 rounded text-sm"

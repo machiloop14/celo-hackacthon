@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+interface IERC20 {
+    function transfer(address to, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function balanceOf(address account) external view returns (uint256);
+}
+
 contract PredictionMarket {
     struct Market {
         uint256 id;
@@ -20,6 +26,7 @@ contract PredictionMarket {
     uint256 public marketCount;
     uint256 public feePercentage = 2; // 2% fee
     address public owner;
+    IERC20 public token; // cUSD token address
 
     event MarketCreated(
         uint256 indexed marketId,
@@ -56,8 +63,9 @@ contract PredictionMarket {
         _;
     }
 
-    constructor() {
+    constructor(address _token) {
         owner = msg.sender;
+        token = IERC20(_token);
     }
 
     function createMarket(
@@ -80,22 +88,25 @@ contract PredictionMarket {
         return marketId;
     }
 
-    function placeBet(uint256 _marketId, bool _side) external payable validMarket(_marketId) {
+    function placeBet(uint256 _marketId, bool _side, uint256 _amount) external validMarket(_marketId) {
         Market storage market = markets[_marketId];
         require(block.timestamp < market.endTime, "Market closed");
         require(!market.resolved, "Market already resolved");
-        require(msg.value > 0, "Must bet something");
+        require(_amount > 0, "Must bet something");
+
+        // Transfer tokens from user to contract
+        require(token.transferFrom(msg.sender, address(this), _amount), "Token transfer failed");
 
         if (_side) {
-            market.yesBets[msg.sender] += msg.value;
-            market.yesVotes += msg.value;
+            market.yesBets[msg.sender] += _amount;
+            market.yesVotes += _amount;
         } else {
-            market.noBets[msg.sender] += msg.value;
-            market.noVotes += msg.value;
+            market.noBets[msg.sender] += _amount;
+            market.noVotes += _amount;
         }
 
-        market.totalStaked += msg.value;
-        emit BetPlaced(_marketId, msg.sender, _side, msg.value);
+        market.totalStaked += _amount;
+        emit BetPlaced(_marketId, msg.sender, _side, _amount);
     }
 
     function resolveMarket(uint256 _marketId, bool _outcome) external validMarket(_marketId) {
@@ -139,8 +150,8 @@ contract PredictionMarket {
         uint256 winningsPool = totalPool - fee;
         uint256 winnings = (winningsPool * userBet) / totalWinningSide;
 
-        (bool success, ) = payable(msg.sender).call{value: winnings}("");
-        require(success, "Transfer failed");
+        // Transfer tokens to winner
+        require(token.transfer(msg.sender, winnings), "Token transfer failed");
 
         emit WinningsClaimed(_marketId, msg.sender, winnings);
     }
@@ -184,10 +195,9 @@ contract PredictionMarket {
     }
 
     function withdrawFees() external onlyOwner {
-        uint256 balance = address(this).balance;
+        uint256 balance = token.balanceOf(address(this));
         require(balance > 0, "No fees to withdraw");
-        (bool success, ) = payable(owner).call{value: balance}("");
-        require(success, "Transfer failed");
+        require(token.transfer(owner, balance), "Token transfer failed");
     }
 
     function setFeePercentage(uint256 _feePercentage) external onlyOwner {
