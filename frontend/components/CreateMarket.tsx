@@ -2,13 +2,15 @@
 
 import { useState } from 'react'
 import { ethers } from 'ethers'
+import { sendTransaction } from '@/utils/minipayTransactions'
 
 interface CreateMarketProps {
   contract: ethers.Contract
   onMarketCreated: () => void
+  cusdAddress: string
 }
 
-export default function CreateMarket({ contract, onMarketCreated }: CreateMarketProps) {
+export default function CreateMarket({ contract, onMarketCreated, cusdAddress }: CreateMarketProps) {
   const [question, setQuestion] = useState('')
   const [duration, setDuration] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -19,9 +21,14 @@ export default function CreateMarket({ contract, onMarketCreated }: CreateMarket
 
     try {
       setLoading(true)
-      const tx = await contract.createMarket(
-        `Will there be an electrical fault at University of Ibadan on ${question}?`,
-        duration
+      const tx = await sendTransaction(
+        contract,
+        'createMarket',
+        [
+          `Will there be an electrical fault at University of Ibadan on ${question}?`,
+          duration
+        ],
+        cusdAddress
       )
       await tx.wait()
       setQuestion('')

@@ -354,9 +354,9 @@ export default function Home() {
           disconnectWallet={disconnectWallet}
         />
 
-        {account && contract && cusdToken && (
+        {account && contract && cusdToken && cusdAddress && (
           <>
-            <CreateMarket contract={contract} onMarketCreated={loadMarkets} />
+            <CreateMarket contract={contract} onMarketCreated={loadMarkets} cusdAddress={cusdAddress} />
 
             <div className="mt-8">
               <h2 className="text-2xl font-bold mb-4">Active Markets</h2>

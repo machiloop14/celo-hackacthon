@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import { formatDistance } from 'date-fns'
+import { sendTransaction } from '@/utils/minipayTransactions'
+import { isMiniPayAvailable } from '@/utils/walletDetection'
 
 interface Market {
   id: number
@@ -61,26 +63,68 @@ export default function MarketCard({ market, contract, account, onUpdate, cusdTo
       setLoading(true)
       const amount = ethers.utils.parseEther(betAmount)
       
+      // Check user's cUSD balance first
+      const balance = await cusdToken.balanceOf(account)
+      if (balance.lt(amount)) {
+        alert(`Insufficient cUSD balance. You have ${ethers.utils.formatEther(balance)} cUSD, but need ${betAmount} cUSD.`)
+        return
+      }
+
       // Check and approve token allowance
       const contractAddress = contract.address
       const allowance = await cusdToken.allowance(account, contractAddress)
       
       if (allowance.lt(amount)) {
-        // Need to approve
-        const approveTx = await cusdToken.approve(contractAddress, ethers.constants.MaxUint256)
-        await approveTx.wait()
+        // Need to approve - show user what's happening
+        console.log('Approving cUSD tokens...')
+        
+        // Use MiniPay-optimized transaction for approval if on MiniPay
+        if (isMiniPayAvailable()) {
+          const approveTx = await sendTransaction(
+            cusdToken,
+            'approve',
+            [contractAddress, ethers.constants.MaxUint256],
+            cusdAddress
+          )
+          await approveTx.wait()
+        } else {
+          const approveTx = await cusdToken.approve(contractAddress, ethers.constants.MaxUint256)
+          await approveTx.wait()
+        }
+        console.log('Approval confirmed!')
       }
 
-      // Place the bet
-      const tx = await contract.placeBet(market.id, side, amount)
+      // Place the bet - use MiniPay-optimized transaction
+      console.log('Placing bet...')
+      const tx = await sendTransaction(
+        contract,
+        'placeBet',
+        [market.id, side, amount],
+        cusdAddress,
+        // Only set gas limit for non-MiniPay wallets
+        isMiniPayAvailable() ? undefined : { gasLimit: 300000 }
+      )
+      console.log('Bet transaction sent, waiting for confirmation...')
       await tx.wait()
+      console.log('Bet confirmed!')
+      
       setBetAmount('')
       loadUserBets()
       onUpdate()
       alert('Bet placed successfully!')
     } catch (error: any) {
       console.error('Error placing bet:', error)
-      alert(`Error: ${error.message || 'Failed to place bet'}`)
+      
+      // Provide more helpful error messages
+      if (error.message?.includes('insufficient funds') || error.message?.includes('balance')) {
+        alert('Insufficient cUSD balance. Please ensure you have enough cUSD tokens.')
+      } else if (error.message?.includes('allowance') || error.message?.includes('transfer')) {
+        alert('Token approval failed. Please try approving again.')
+      } else if (error.message?.includes('gas')) {
+        alert('Gas estimation failed. Please try again or ensure you have enough CELO for gas fees.')
+      } else {
+        alert(`Error: ${error.message || 'Failed to place bet'}`)
+      }
     } finally {
       setLoading(false)
     }
@@ -89,7 +133,12 @@ export default function MarketCard({ market, contract, account, onUpdate, cusdTo
   const resolveMarket = async (outcome: boolean) => {
     try {
       setResolving(true)
-      const tx = await contract.resolveMarket(market.id, outcome)
+      const tx = await sendTransaction(
+        contract,
+        'resolveMarket',
+        [market.id, outcome],
+        cusdAddress
+      )
       await tx.wait()
       onUpdate()
       alert('Market resolved successfully!')
@@ -104,7 +153,12 @@ export default function MarketCard({ market, contract, account, onUpdate, cusdTo
   const claimWinnings = async () => {
     try {
       setClaiming(true)
-      const tx = await contract.claimWinnings(market.id)
+      const tx = await sendTransaction(
+        contract,
+        'claimWinnings',
+        [market.id],
+        cusdAddress
+      )
       await tx.wait()
       loadUserBets()
       onUpdate()
