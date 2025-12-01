@@ -2,6 +2,9 @@
 
 A decentralized prediction market dApp built on Celo Sepolia testnet for predicting daily electrical faults at the University of Ibadan.
 
+# Live Site 
+- visit (https://celo-hack.vercel.app/)
+
 ## 🏗️ Project Structure
 
 ```
